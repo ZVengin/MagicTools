@@ -1,2 +1,2 @@
-# reuse_code
-this repository includes the frequently used code in training neural network
+# MagicTools
+Frequently used tools in writing codes
