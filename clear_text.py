@@ -38,3 +38,28 @@ def clean_str(txt):
 	txt = re.sub(r'\s+', ' ', txt) # remove extra spaces
 	
 	return txt
+
+
+import nltk
+# this function cuts the text into tokens without cutting the persons' name
+# e.g. "It was true that Francis Oakley was only a half brother to Mr. Maurice." ==>>> ['It', 'was', 'true', 'that', 'Francis Oakley', 'was', 'only', 'a', 'half', 'brother', 'to', 'Mr. Maurice', '.']
+def cut_text(text):
+    tokens = nltk.word_tokenize(text)
+    tagged_tokens = nltk.pos_tag(tokens)
+
+    # Combine consecutive proper nouns into a single token
+    result_tokens = []
+    current_name = ""
+    for token, pos_tag in tagged_tokens:
+        if pos_tag == 'NNP':
+            current_name += token + " "
+        else:
+            if current_name:
+                result_tokens.append(current_name.strip())
+                current_name = ""
+            result_tokens.append(token)
+
+    if current_name:
+        result_tokens.append(current_name.strip())
+
+    return result_tokens
