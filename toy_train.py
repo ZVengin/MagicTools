@@ -145,7 +145,8 @@ def get_arguments():
     return args
 
 
-
+def construct_instance(data,tokenizer,is_train, is_chinese):
+    return data
 
 def train(config):
     set_random_seeds(config.seed)
@@ -159,7 +160,7 @@ def train(config):
     if global_rank == 0:
         wandb_run = wandb.init(
             project=f"MagicToolTest",
-            name=f"MNLI",
+            name=f"SST2",
             config=config
         )
 
@@ -185,7 +186,7 @@ def train(config):
         dataset_file=config.train_file,
         format='json',
         tokenizer=tokenizer,
-        construct_instance=lambda x:x,
+        construct_instance=construct_instance,
         process_inputs=process_instance,
         sample_weight=None,
         is_train=True,
@@ -202,7 +203,7 @@ def train(config):
             dataset_file=config.dev_file,
             format='json',
             tokenizer=tokenizer,
-            construct_instance=lambda x: x,
+            construct_instance=construct_instance,
             process_inputs=process_instance,
             sample_weight=None,
             is_train=False,
