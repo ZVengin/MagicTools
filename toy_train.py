@@ -94,7 +94,7 @@ def evaluate(model, device, test_loader):
 
 
 def get_loss(model, batch):
-    loss = model._model(
+    loss = model(
         input_ids=batch['input_ids'].to(model._local_rank),
         attention_mask=batch['attention_mask'].to(model._local_rank),
         labels=batch['label']
