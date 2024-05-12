@@ -103,9 +103,9 @@ def get_loss(model, batch):
 
 
 def get_predictions(model, tokenizer, batch,do_sample):
-    logits = model._model(
-        input_ids= batch['input_ids'].to(model._local_rank),
-        attention_mask=batch['attention_mask'].to(model._local_rank)
+    logits = model.(
+        input_ids= batch['input_ids'].to(model.device),
+        attention_mask=batch['attention_mask'].to(model.device)
     ).logits.detach()
     records = []
     for index,logit in zip(batch['index'], logits):
