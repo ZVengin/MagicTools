@@ -57,7 +57,7 @@ def process_instance(tokenizer,instance,is_train):
 
 
 def collate_batch(batch):
-    input_ids, attention_mask, labels, indexs = [list() for i in range(3)]
+    input_ids, attention_mask, labels, indexs = [list() for i in range(4)]
     for inst in batch:
         input_ids.append(inst['input_ids'])
         attention_mask.append(inst['attention_mask'])
