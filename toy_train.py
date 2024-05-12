@@ -166,7 +166,7 @@ def train(config):
         )
 
     model = AutoModelForSequenceClassification.from_pretrained("google-bert/bert-base-cased")
-    tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-cased")
+
     model.to("cuda:{}".format(device_id))
     model = DDP(model, device_ids=[device_id])
 
@@ -247,4 +247,5 @@ def train(config):
 
 if __name__ == '__main__':
     config = get_arguments()
+    tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-cased")
     train(config=config)
