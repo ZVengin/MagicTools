@@ -74,25 +74,6 @@ def collate_batch(batch):
     return batch
 
 
-
-def evaluate(model, device, test_loader):
-    model.eval()
-
-    correct = 0
-    total = 0
-    with torch.no_grad():
-        for data in test_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-
-    accuracy = correct / total
-
-    return accuracy
-
-
 def get_loss(model, batch):
     loss = model(
         input_ids=batch['input_ids'].to(model.device),
