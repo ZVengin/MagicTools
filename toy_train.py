@@ -234,7 +234,7 @@ def train(config):
         magic_model.resume(model_path)
 
     for epoch in range(magic_model._epoch,config.epochs):
-        magic_model.train(epoch)
+        magic_model.train_epoch(epoch)
         if global_rank == 0:
             records = magic_model.test()
             scores = magic_model.compute_score(records)
