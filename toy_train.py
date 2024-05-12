@@ -1,13 +1,14 @@
 import torch
 import json
 import wandb
-import torch.nn.parallel.DistributedDataParallel as DDP
+
 from model import MagicModel
 from dataset import get_dataloader
 from magic_utils import PadSequence
 from transformers import AutoTokenizer,AutoModelForSequenceClassification
 from datasets import load_dataset, load_metric
 from torch.distributed import init_process_group, destroy_process_group
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 import argparse
 import os
@@ -31,13 +32,15 @@ def get_dataset(dataset_dir):
     actual_task = "mnli"
     data = load_dataset("glue", actual_task)
     index = 0
-    for split in ["train", "dev", "test"]:
+    for split in ["train", "validation_matched", "test_matched"]:
         dataset_path = os.path.join(dataset_dir,f'{split}.json')
+        records = []
         for inst in data[split]:
             inst['index'] = index
             index += 1
+            records.append(inst)
         with open(dataset_path,'w') as f:
-            json.dump(data[split], f)
+            json.dump(records, f)
 
 
 def process_instance(tokenizer,instance,is_train):
