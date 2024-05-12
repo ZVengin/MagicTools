@@ -242,7 +242,7 @@ def train(config):
                 magic_model._best_eval = scores['accuracy']
                 magic_model.save_model(model_path=model_path)
 
-destroy_process_group()
+    destroy_process_group()
 
 if __name__ == '__main__':
     config = get_arguments()
