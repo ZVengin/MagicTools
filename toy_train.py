@@ -1,19 +1,21 @@
 import torch
-import datasets
-import torch.nn as nn
-import torch.optim as optim
+import json
+import wandb
 import torch.nn.parallel.DistributedDataParallel as DDP
-import torch.distributed as dist
 from model import MagicModel
 from dataset import get_dataloader
 from magic_utils import PadSequence
 from transformers import AutoTokenizer,AutoModelForSequenceClassification
 from datasets import load_dataset, load_metric
+from torch.distributed import init_process_group, destroy_process_group
 
 import argparse
 import os
 import random
 import numpy as np
+
+wandb.login(key='b3451a268e7b638ac4d8789aa1e8046da81710c5')
+
 
 metric = load_metric('glue',"mnli")
 
@@ -152,6 +154,13 @@ def train(config):
     device_id = int(os.environ['LOCAL_RANK'])
     global_rank = int(os.environ['RANK'])
 
+    if global_rank == 0:
+        wandb_run = wandb.init(
+            project=f"MagicToolTest",
+            name=f"MNLI",
+            config=config
+        )
+
     model = AutoModelForSequenceClassification.from_pretrained("google-bert/bert-base-cased")
     tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-cased")
     model.to("cuda:{}".format(device_id))
@@ -181,7 +190,7 @@ def train(config):
         use_cache=False,
         cache_dir=config.cache_dir,
         batch_size=config.batch_size,
-        collate_fn=collate_fn,
+        collate_fn=collate_batch,
         num_workers=config.num_workers,
         distributed=True
     )
@@ -198,7 +207,7 @@ def train(config):
             use_cache=False,
             cache_dir=config.cache_dir,
             batch_size=config.batch_size,
-            collate_fn=collate_fn,
+            collate_fn=collate_batch,
             num_workers=config.num_workers,
             distributed=False
         )
@@ -230,6 +239,7 @@ def train(config):
                 magic_model._best_eval = scores['accuracy']
                 magic_model.save_model(model_path=model_path)
 
+destroy_process_group()
 
 if __name__ == '__main__':
     config = get_arguments()
