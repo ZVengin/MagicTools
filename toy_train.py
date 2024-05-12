@@ -156,6 +156,7 @@ def train(config):
 
     device_id = int(os.environ['LOCAL_RANK'])
     global_rank = int(os.environ['RANK'])
+    print('local rank:{} | global rank:{}'.format(device_id, global_rank))
 
     if global_rank == 0:
         wandb_run = wandb.init(
