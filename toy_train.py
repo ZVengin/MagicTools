@@ -29,10 +29,9 @@ def set_random_seeds(random_seed=0):
 
 
 def get_dataset(dataset_dir):
-    actual_task = "mnli"
-    data = load_dataset("glue", actual_task)
+    data = load_dataset("glue", 'sst2')
     index = 0
-    for split in ["train", "validation_matched", "test_matched"]:
+    for split in ["train", "validation", "test"]:
         dataset_path = os.path.join(dataset_dir,f'{split}.json')
         records = []
         for inst in data[split]:
