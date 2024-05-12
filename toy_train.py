@@ -199,22 +199,23 @@ def train(config):
         distributed=True
     )
 
-    if global_rank == 0:
-        val_loader = get_dataloader(
-            dataset_file=config.dev_file,
-            format='json',
-            tokenizer=tokenizer,
-            construct_instance=construct_instance,
-            process_inputs=process_instance,
-            sample_weight=None,
-            is_train=False,
-            use_cache=False,
-            cache_dir=config.cache_dir,
-            batch_size=config.batch_size,
-            collate_fn=collate_batch,
-            num_workers=config.num_workers,
-            distributed=False
-        )
+    val_loader = get_dataloader(
+        dataset_file=config.dev_file,
+        format='json',
+        tokenizer=tokenizer,
+        construct_instance=construct_instance,
+        process_inputs=process_instance,
+        sample_weight=None,
+        is_train=False,
+        use_cache=False,
+        cache_dir=config.cache_dir,
+        batch_size=config.batch_size,
+        collate_fn=collate_batch,
+        num_workers=config.num_workers,
+        distributed=False
+    )
+    magic_model.load_data('train', train_loader)
+    magic_model.load_data('test', val_loader)
 
     epoch_steps = len(train_loader)
     total_steps = epoch_steps*config.epochs
@@ -226,8 +227,7 @@ def train(config):
         weight_decay=config.weight_decay,
         adam_epsilon=config.adam_epsilon)
 
-    magic_model.load_data('train', train_loader)
-    magic_model.load_data('test', val_loader)
+
 
     model_path = os.path.join(config.log_dir, 'best_model.pth')
     if config.resume:
