@@ -8,7 +8,7 @@ the training scripts.
 ### Tutorial
 - install the package
 ```angular2html
-pip install 
+pip install https://github.com/ZVengin/MagicTools.git
 ```
 
 - how to use the package
