@@ -5,6 +5,9 @@ This repository aims to provide a general training script
 to train the models and alleviate the burden of re-writing
 the training scripts.
 
+__Please kindly star this repository if this repository 
+is helpful to you!!!__
+
 ### Tutorial
 - install the package
 ```angular2html
