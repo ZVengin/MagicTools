@@ -10,8 +10,10 @@ is helpful to you!!!__
 
 ### Tutorial
 - install the package
-```angular2html
-pip install https://github.com/ZVengin/MagicTools.git
+```shell
+git clone https://github.com/ZVengin/MagicTools.git
+cd MagicTools
+pip install .
 ```
 
 - how to use the package
