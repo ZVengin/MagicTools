@@ -9,7 +9,7 @@ from train_function import TrainUtils
 import argparse
 
 
-wandb.login(key='you wandb key here')
+wandb.login(key='your wandb key here')
 
 
 metric = load_metric('glue',"mnli")
