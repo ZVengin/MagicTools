@@ -1,10 +1,9 @@
 import torch
 import wandb
 
-from magic_utils import PadSequence
+from MagicTools import PadSequence,TrainUtils
 from transformers import AutoTokenizer,AutoModelForSequenceClassification
 from datasets import load_dataset, load_metric
-from train_function import TrainUtils
 
 import argparse
 

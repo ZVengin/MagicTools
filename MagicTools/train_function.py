@@ -3,8 +3,8 @@ import wandb
 import os
 import random
 import numpy as np
-from model import MagicModel
-from dataset import get_dataloader
+from .model import MagicModel
+from .dataset import get_dataloader
 from torch.distributed import init_process_group, destroy_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
