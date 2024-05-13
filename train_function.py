@@ -72,7 +72,7 @@ class TrainUtils:
         magic_model = MagicModel(
             model,
             tokenizer,
-            loss_function=self.loss_function(),
+            loss_function=self.loss_function,
             inference=self.inference,
             compute_score=self.compute_score,
             process_outs=lambda tokenizer, outs, batch: outs,
