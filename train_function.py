@@ -47,7 +47,7 @@ class TrainUtils:
 
 
     def train(self,config):
-        self.set_random_seeds(config.seed)
+        self.set_random_seed(config.seed)
         # rank and world_size will be automatically set by torchrun
         init_process_group(backend='nccl')
         torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
