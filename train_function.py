@@ -136,8 +136,8 @@ class TrainUtils:
                 records = magic_model.test()
                 score = magic_model.compute_score(records)
                 wandb.log({'dev_score': score})
-                if (config.optimized_direction == 'max' and score >= magic_model._best_eval_score
-                ) or (config.optimized_direction == 'min' and score <= magic_model._best_eval_score):
+                if (config.optimize_direction == 'max' and score >= magic_model._best_eval_score
+                ) or (config.optimize_direction == 'min' and score <= magic_model._best_eval_score):
                     magic_model._best_eval = score
                     magic_model.save_model(model_path=model_path)
 
