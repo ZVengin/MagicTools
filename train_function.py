@@ -8,8 +8,6 @@ from dataset import get_dataloader
 from torch.distributed import init_process_group, destroy_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from toy_train import MyTrainUtils
-
 
 class TrainUtils:
     def get_model(self):
