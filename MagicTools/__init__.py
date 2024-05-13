@@ -3,3 +3,4 @@ from .file_operation import *
 from .model import MagicModel
 from .dataset import *
 from .magic_utils import *
+from .train_function import *
