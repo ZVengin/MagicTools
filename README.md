@@ -94,5 +94,5 @@ multiple GPUs, e.g. running the `toy_train.py` on two GPUs
 on a single machine. To run the `toy_train.py`, the wandb login
 key needs to be set in the `toy_train.py`.
 ```shell
-torchrun --standalone --nproc_per_node=2 toy_train.py --train_file ./dataset/train.json --dev_file ./dataset/validation.json --log_dir ./logs --batch_size 64
-```
+ torchrun --standalone --nproc_per_node=2 toy_train.py --train_file ./../dataset/train.json --dev_file ./../dataset/validation.json --log_dir ./../logs --batch_size 64
+ ```
