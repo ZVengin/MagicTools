@@ -1,7 +1,7 @@
 import torch, os, math, json,wandb, logging
 import torch.nn as nn
 from tqdm import tqdm
-from magic_utils import GetLoss
+from .magic_utils import GetLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(message)s')
 logger = logging.getLogger(__name__)
