@@ -37,6 +37,14 @@ class TrainUtils:
     def collate_fn(self,batch):
         pass
 
+    def get_optimizer(self,model, lr, total_steps, warmup_steps,weight_decay, adam_epsilon):
+        model.get_optimizer(
+            lr=lr,
+            training_steps=total_steps,
+            warmup_steps=warmup_steps,
+            weight_decay=weight_decay,
+            adam_epsilon=adam_epsilon)
+
 
     def set_random_seed(self,random_seed):
         torch.manual_seed(random_seed)
@@ -57,6 +65,8 @@ class TrainUtils:
         print('local rank:{} | global rank:{}'.format(device_id, global_rank))
 
         if global_rank == 0:
+            os.makedirs(config.log_dir, exist_ok=True)
+
             wandb_run = wandb.init(
                 project=config.project_name,
                 name=config.run_name,
@@ -119,19 +129,16 @@ class TrainUtils:
         epoch_steps = len(train_loader)
         total_steps = epoch_steps * config.epochs
         warmup_steps = total_steps * config.warmup_rate
-        magic_model.get_optimizer(
-            lr=config.lr,
-            training_steps=total_steps,
-            warmup_steps=warmup_steps,
-            weight_decay=config.weight_decay,
-            adam_epsilon=config.adam_epsilon)
+
+        self.get_optimizer(magic_model,config.lr,total_steps,warmup_steps,config.weight_decay,config.adam_epsilon)
+
 
         model_path = os.path.join(config.log_dir, 'best_model.pth')
         if config.resume:
             magic_model.resume(model_path)
 
         for epoch in range(magic_model._epoch, config.epochs):
-            magic_model.train_epoch(epoch)
+            magic_model.train_epoch(epoch, accumulated_size=config.accumulated_size)
             if global_rank == 0:
                 records = magic_model.test()
                 score = magic_model.compute_score(records)

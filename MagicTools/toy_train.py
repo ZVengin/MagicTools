@@ -98,6 +98,7 @@ class MyTrainUtils(TrainUtils):
         parser.add_argument('--project_name', type=str, default='MagicToolsTest')
         parser.add_argument('--run_name', type=str, default='SST2')
         parser.add_argument('--optimize_direction', type=str, default='max')
+        parser.add_argument('--accumulated_size', type=int, default=1)
 
         args = parser.parse_args()
         return args
