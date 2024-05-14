@@ -77,7 +77,7 @@ class TrainUtils:
         tokenizer = self.get_tokenizer()
 
         model.to("cuda:{}".format(device_id))
-        model = DDP(model, device_ids=[device_id])
+        model = DDP(model, device_ids=[device_id],find_unused_parameters=True)
 
         magic_model = MagicModel(
             model,
