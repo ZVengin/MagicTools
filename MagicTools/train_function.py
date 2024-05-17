@@ -86,7 +86,7 @@ class TrainUtils:
             inference=self.inference,
             compute_score=self.compute_score,
             process_outs=lambda tokenizer, outs, batch: outs,
-            init_eval_score=0,
+            init_eval_score=config.init_eval_score,
             optimize_direction=config.optimize_direction,
             distributed=True,
             local_rank=device_id,
