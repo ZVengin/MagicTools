@@ -101,3 +101,58 @@ key needs to be set in the `toy_train.py`.
 ```shell
  torchrun --standalone --nproc_per_node=2 toy_train.py --train_file ./../dataset/train.json --dev_file ./../dataset/validation.json --log_dir ./../logs --batch_size 64
  ```
+
+- when running the scripts on multiple nodes using the `SLURM` schedule system, 
+we need specify the host ip address and the `NCCL_SOCKET_IFNAME` . To get the host ip address
+and the `NCCL_SOCKET_IFNAME` automatically, we could run the following commands in 
+the bash script of job submission, e.g. `run_toy_train.sh` .
+```shell
+# get the host IP address
+nodes=( $( scontrol show hostnames $SLURM_JOB_NODELIST ) )
+echo nodes:${nodes}
+nodes_array=($nodes)
+head_node=${nodes_array[0]}
+head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)
+
+## get the NCCL_SOCKET_IFNAME
+IPOUT=$(ifconfig | grep 'enp')
+NCCL_SOCKET_IFNAME=$( cut -d ':' -f 1 <<< ${IPOUT})
+echo NCCL_SOCKET_IFNAME:$NCCL_SOCKET_IFNAME
+```
+then we could use the `torchrun` to run the training script with the following command
+```shell
+torchrun \
+        --nproc_per_node=4 \
+        --nnodes=2 \
+        --rdzv_id $RANDOM \
+        --rdzv_backend c10d \
+        --rdzv_endpoint $head_node_ip:29500 \
+        toy_train.py \
+        --train_file ./../dataset/train.json \
+        --dev_file ./../dataset/validation.json \
+        --log_dir ./../logs \
+        --batch_size $BATCH_SIZE
+```
+the `rdzv_id` is the id for the distributed training job, 
+it is automatically set by the `torchrun`.
+the `rdzv_backend` is the backend for process communication.
+the `rdzv_endpoint` is the ip address and port of the host
+process.
+the `nproc_per_node` is the process number for each node,
+usually one process for each GPU of a node.
+the `nnodes` is the node number we used to run the job.
+
+In the `SLURM` system, the job could be submitted with the 
+following command
+```shell
+sbatch \
+--partition=v \
+--nodes=2 \
+--gres=gpu:4  \
+--mem=80G   \
+-t 48:00:00 \
+-o exp.out \
+-J job_name \
+--export=ALL,BATCH_SIZE=16,...\
+run_toy_train.sh
+```
