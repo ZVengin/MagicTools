@@ -1,4 +1,4 @@
-# MagicTools
+# MagicTools: A Training Framework Using DistributedDataParallel(DDP)
 This is a repository for training the language models 
 using the DistributedDataParallel framework.
 This repository aims to provide a general training script
