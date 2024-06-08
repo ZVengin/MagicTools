@@ -1,6 +1,6 @@
 import torch,wandb, logging
 import torch.nn as nn
-import torch.dist as dist
+import torch.distributed as dist
 from tqdm import tqdm
 from .magic_utils import GetLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
