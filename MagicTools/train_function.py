@@ -141,6 +141,7 @@ class TrainUtils:
             magic_model.train_epoch(epoch, accumulated_size=config.accumulated_size)
             records = magic_model.test()
             if global_rank == 0:
+                print(f'record:{len(records)},data:{len(magic_model._dataset["test"].data)}')
                 score = magic_model.compute_score(records)
                 wandb.log({'dev_score': score})
                 if (config.optimize_direction == 'max' and score >= magic_model._best_eval_score
