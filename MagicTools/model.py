@@ -1,5 +1,6 @@
-import torch, os, math, json,wandb, logging
+import torch,wandb, logging
 import torch.nn as nn
+import torch.dist as dist
 from tqdm import tqdm
 from .magic_utils import GetLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
@@ -19,6 +20,12 @@ The function of inference: inference(model,tokenizer,batch,do_sample)
 The function of computing score: compute_score(results)
 The function of processing outputs: process_outs(tokenizer,accelerator, batch_outputs, batch)
 """
+
+def gather_all_objects(obj):
+    all_objs = [None for _ in dist.get_world_size()]
+    dist.all_gather_object(all_objs, obj)
+    all_objs = sum(all_objs,[])
+    return all_objs
 
 class MagicModel(nn.Module):
     def __init__(self, model, tokenizer, 
@@ -132,7 +139,7 @@ class MagicModel(nn.Module):
         count = 0
         for batch in (self._dataset["test"] if no_tqdm else tqdm(self._dataset["test"])):
             total_batch_num = len(self._dataset["test"])
-            with torch.no_grad():
+            with torch.no_grad(), self._model.no_sync():
                 batch_outputs = self.inference(
                     self._model,
                     self._tokenizer,
@@ -150,6 +157,7 @@ class MagicModel(nn.Module):
                 count += 1
                 #if count>100:
                 #    break
+        results = gather_all_objects(results)
         return results
 
 

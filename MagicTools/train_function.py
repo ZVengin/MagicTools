@@ -121,7 +121,7 @@ class TrainUtils:
             batch_size=config.batch_size,
             collate_fn=self.collate_fn,
             num_workers=config.num_workers,
-            distributed=False
+            distributed=True
         )
         magic_model.load_data('train', train_loader)
         magic_model.load_data('test', val_loader)
@@ -139,8 +139,8 @@ class TrainUtils:
 
         for epoch in range(magic_model._epoch, config.epochs):
             magic_model.train_epoch(epoch, accumulated_size=config.accumulated_size)
+            records = magic_model.test()
             if global_rank == 0:
-                records = magic_model.test()
                 score = magic_model.compute_score(records)
                 wandb.log({'dev_score': score})
                 if (config.optimize_direction == 'max' and score >= magic_model._best_eval_score
