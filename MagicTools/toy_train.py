@@ -99,7 +99,6 @@ class MyTrainUtils(TrainUtils):
         parser.add_argument('--run_name', type=str, default='SST2')
         parser.add_argument('--optimize_direction', type=str, default='max')
         parser.add_argument('--accumulated_size', type=int, default=1)
-        parser.add_argument('--optimize_direction', type=str, default='max')
         parser.add_argument('--init_eval_score', type=float, default=0.0)
 
         args = parser.parse_args()
