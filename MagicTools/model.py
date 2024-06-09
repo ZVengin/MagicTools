@@ -22,7 +22,7 @@ The function of processing outputs: process_outs(tokenizer,accelerator, batch_ou
 """
 
 def gather_all_objects(obj):
-    all_objs = [None for _ in dist.get_world_size()]
+    all_objs = [None for _ in range(dist.get_world_size())]
     dist.all_gather_object(all_objs, obj)
     all_objs = sum(all_objs,[])
     return all_objs
