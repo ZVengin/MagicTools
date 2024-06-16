@@ -1,5 +1,6 @@
 import torch
 import wandb
+import logging
 import os
 import random
 import numpy as np
@@ -8,6 +9,8 @@ from .dataset import get_dataloader
 from torch.distributed import init_process_group, destroy_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
+logging.basicConfig(level=logging.INFO,format='%(asctime)s %(message)s')
+logger = logging.getLogger(__name__)
 
 class TrainUtils:
     def get_model(self):
@@ -141,11 +144,13 @@ class TrainUtils:
             magic_model.train_epoch(epoch, accumulated_size=config.accumulated_size)
             records = magic_model.test()
             if global_rank == 0:
-                print(f'record:{len(records)},data:{len(magic_model._dataset["test"].dataset.data)}')
+                logger.info(f'==>>>record:{len(records)},data:{len(magic_model._dataset["test"].dataset.data)}')
                 score = magic_model.compute_score(records)
                 wandb.log({'dev_score': score})
                 if (config.optimize_direction == 'max' and score >= magic_model._best_eval_score
                 ) or (config.optimize_direction == 'min' and score <= magic_model._best_eval_score):
+                    logger.info('==>>>best score:{}/eval score:{}'.format(magic_model._best_eval_score,score))
+                    logger.info('==>>>best model is saved at {}'.format(model_path))
                     magic_model._best_eval = score
                     magic_model.save_model(model_path=model_path)
 
