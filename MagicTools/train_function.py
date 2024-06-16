@@ -151,7 +151,7 @@ class TrainUtils:
                 ) or (config.optimize_direction == 'min' and score <= magic_model._best_eval_score):
                     logger.info('==>>>best score:{}/eval score:{}'.format(magic_model._best_eval_score,score))
                     logger.info('==>>>best model is saved at {}'.format(model_path))
-                    magic_model._best_eval = score
+                    magic_model._best_eval_score = score
                     magic_model.save_model(model_path=model_path)
 
         destroy_process_group()
