@@ -107,6 +107,7 @@ class TrainUtils:
             cache_dir=config.cache_dir,
             batch_size=config.batch_size,
             collate_fn=self.collate_fn,
+            is_chinese=config.is_chinese,
             num_workers=config.num_workers,
             distributed=True
         )
@@ -123,6 +124,7 @@ class TrainUtils:
             cache_dir=config.cache_dir,
             batch_size=config.batch_size,
             collate_fn=self.collate_fn,
+            is_chinese=config.is_chinese,
             num_workers=config.num_workers,
             distributed=True
         )
