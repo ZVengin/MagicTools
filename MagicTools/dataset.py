@@ -101,6 +101,7 @@ def get_dataloader(
     batch_size,
     collate_fn,
     num_workers,
+    is_chinese,
     sample_weight=None,
     distributed=False
 ):
@@ -113,7 +114,8 @@ def get_dataloader(
         is_train=is_train,
         use_cache=use_cache,
         cache_dir=cache_dir,
-        sample_weight=sample_weight
+        sample_weight=sample_weight,
+        is_chinese=is_chinese
     )
     if distributed:
         sampler = DistributedSampler(dataset)
