@@ -82,7 +82,7 @@ class MyTrainUtils(TrainUtils):
         return batch
 
 
-    def get_arguments(self):
+    def get_train_arguments(self):
         parser = argparse.ArgumentParser()
         parser.add_argument('--train_file', type=str, required=True)
         parser.add_argument('--dev_file', type=str, required=True)
