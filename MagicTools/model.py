@@ -1,4 +1,4 @@
-import torch,wandb, logging
+import torch,wandb, logging,os
 import torch.nn as nn
 import torch.distributed as dist
 from tqdm import tqdm
@@ -85,9 +85,12 @@ class MagicModel(nn.Module):
         torch.save(ckpt, model_path)
 
     def resume(self, model_path):
+        assert os.path.exists(model_path), 'model file does not exist'
         ckpt = torch.load(model_path)
-        self._optimizer.load_state_dict(ckpt["optimizer"])
-        self._lr_scheduler.load_state_dict(ckpt["lr_scheduler"])
+        if self._optimizer is not None:
+            self._optimizer.load_state_dict(ckpt["optimizer"])
+        if self._lr_scheduler is not None:
+            self._lr_scheduler.load_state_dict(ckpt["lr_scheduler"])
         if self._distributed:
             self._model.module.load_state_dict(ckpt["model"])
         else:
@@ -145,11 +148,11 @@ class MagicModel(nn.Module):
                     self._tokenizer,
                     batch,
                     do_sample=inference_with_sampling)
-                batch_outputs = self.process_outs(self._tokenizer, batch_outputs, batch)
                 for output in batch_outputs:
                     index = output['index']
                     sample_dict = index2insts[index]
                     output.update(sample_dict)
+                batch_outputs = self.process_outs(self._tokenizer, batch_outputs)
                 results += batch_outputs
                 
                 if count % 10==0:

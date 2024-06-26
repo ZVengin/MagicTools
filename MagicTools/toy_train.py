@@ -14,6 +14,9 @@ wandb.login(key='your wandb key here')
 metric = load_metric('glue',"mnli")
 
 class MyTrainUtils(TrainUtils):
+    def __init__(self, mode):
+        super().__init__(mode=mode)
+
     def inference(self,model, tokenizer, batch,do_sample):
         logits = model(
             input_ids=batch['input_ids'].to(model.device),
@@ -70,7 +73,7 @@ class MyTrainUtils(TrainUtils):
             labels.append(inst['label'])
 
         max_len = max([len(x) for x in input_ids])
-        input_ids = PadSequence(input_ids, max_len=max_len, pad_token_id=tokenizer.pad_token_id)
+        input_ids = PadSequence(input_ids, max_len=max_len, pad_token_id=self.tokenizer.pad_token_id)
         attention_mask = PadSequence(attention_mask, max_len=max_len, pad_token_id=0)
         input_ids = torch.tensor(input_ids, dtype=torch.long)
         attention_mask = torch.tensor(attention_mask, dtype=torch.long)
@@ -117,7 +120,5 @@ class MyTrainUtils(TrainUtils):
 
 
 if __name__ == '__main__':
-    train_utils = MyTrainUtils()
-    config = train_utils.get_arguments()
-    tokenizer = train_utils.get_tokenizer()
-    train_utils.train(config=config)
+    train_utils = MyTrainUtils(mode='train')
+    train_utils.train()

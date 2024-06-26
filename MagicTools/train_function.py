@@ -1,3 +1,5 @@
+import json
+
 import torch
 import wandb
 import logging
@@ -13,13 +15,25 @@ logging.basicConfig(level=logging.INFO,format='%(asctime)s %(message)s')
 logger = logging.getLogger(__name__)
 
 class TrainUtils:
+    def __init__(self, mode):
+        if mode == 'train':
+            self.config = self.get_train_arguments()
+        else:
+            self.config = self.get_test_arguments()
+        self.set_random_seed(self.config.seed)
+        self.model = None
+        self.tokenizer = None
+
     def get_model(self):
         pass
 
     def get_tokenizer(self):
         pass
 
-    def get_arguments(self):
+    def get_train_arguments(self):
+        pass
+
+    def get_test_arguments(self):
         pass
 
     def loss_function(self,model, batch):
@@ -33,6 +47,9 @@ class TrainUtils:
 
     def process_inputs(self,tokenizer,instance,is_train):
         pass
+
+    def processs_outs(self, tokenizer, outs):
+        return outs
 
     def construct_instance(self,data,tokenizer,is_train, is_chinese):
         pass
@@ -57,8 +74,7 @@ class TrainUtils:
         random.seed(random_seed)
 
 
-    def train(self,config):
-        self.set_random_seed(config.seed)
+    def train(self):
         # rank and world_size will be automatically set by torchrun
         init_process_group(backend='nccl')
         torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
@@ -68,92 +84,162 @@ class TrainUtils:
         print('local rank:{} | global rank:{}'.format(device_id, global_rank))
 
         if global_rank == 0:
-            os.makedirs(config.log_dir, exist_ok=True)
+            os.makedirs(self.config.log_dir, exist_ok=True)
 
             wandb_run = wandb.init(
-                project=config.project_name,
-                name=config.run_name,
-                config=config
+                project=self.config.project_name,
+                name=self.config.run_name,
+                config=self.config
             )
 
-        model = self.get_model()
-        tokenizer = self.get_tokenizer()
+        self.model = self.get_model()
+        self.tokenizer = self.get_tokenizer()
 
-        model.to("cuda:{}".format(device_id))
-        model = DDP(model, device_ids=[device_id],find_unused_parameters=True)
+        self.model.to("cuda:{}".format(device_id))
+        self.model = DDP(self.model, device_ids=[device_id],find_unused_parameters=True)
 
         magic_model = MagicModel(
-            model,
-            tokenizer,
+            self.model,
+            self.tokenizer,
             loss_function=self.loss_function,
             inference=self.inference,
             compute_score=self.compute_score,
             process_outs=lambda tokenizer, outs, batch: outs,
-            init_eval_score=config.init_eval_score,
-            optimize_direction=config.optimize_direction,
+            init_eval_score=self.config.init_eval_score,
+            optimize_direction=self.config.optimize_direction,
             distributed=True,
             local_rank=device_id,
             global_rank=global_rank)
 
         train_loader = get_dataloader(
-            dataset_file=config.train_file,
+            dataset_file=self.config.train_file,
             format='json',
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             construct_instance=self.construct_instance,
             process_inputs=self.process_inputs,
             sample_weight=None,
             is_train=True,
             use_cache=False,
-            cache_dir=config.cache_dir,
-            batch_size=config.batch_size,
+            cache_dir=self.config.cache_dir,
+            batch_size=self.config.batch_size,
             collate_fn=self.collate_fn,
-            is_chinese=config.is_chinese,
-            num_workers=config.num_workers,
+            is_chinese=self.config.is_chinese,
+            num_workers=self.config.num_workers,
             distributed=True
         )
 
         val_loader = get_dataloader(
-            dataset_file=config.dev_file,
+            dataset_file=self.config.dev_file,
             format='json',
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             construct_instance=self.construct_instance,
             process_inputs=self.process_inputs,
             sample_weight=None,
             is_train=False,
             use_cache=False,
-            cache_dir=config.cache_dir,
-            batch_size=config.batch_size,
+            cache_dir=self.config.cache_dir,
+            batch_size=self.config.batch_size,
             collate_fn=self.collate_fn,
-            is_chinese=config.is_chinese,
-            num_workers=config.num_workers,
+            is_chinese=self.config.is_chinese,
+            num_workers=self.config.num_workers,
             distributed=True
         )
         magic_model.load_data('train', train_loader)
         magic_model.load_data('test', val_loader)
 
         epoch_steps = len(train_loader)
-        total_steps = epoch_steps * config.epochs
-        warmup_steps = total_steps * config.warmup_rate
+        total_steps = epoch_steps * self.config.epochs
+        warmup_steps = total_steps * self.config.warmup_rate
 
-        self.get_optimizer(magic_model,config.lr,total_steps,warmup_steps,config.weight_decay,config.adam_epsilon)
+        self.get_optimizer(magic_model,self.config.lr,total_steps,warmup_steps,self.config.weight_decay,self.config.adam_epsilon)
 
 
-        model_path = os.path.join(config.log_dir, 'best_model.pth')
-        if config.resume:
+        model_path = os.path.join(self.config.log_dir, 'best_model.pth')
+        if self.config.resume:
             magic_model.resume(model_path)
 
-        for epoch in range(magic_model._epoch, config.epochs):
-            magic_model.train_epoch(epoch, accumulated_size=config.accumulated_size)
+        for epoch in range(magic_model._epoch, self.config.epochs):
+            magic_model.train_epoch(epoch, accumulated_size=self.config.accumulated_size)
             records = magic_model.test()
             if global_rank == 0:
                 logger.info(f'==>>>record:{len(records)},data:{len(magic_model._dataset["test"].dataset.data)}')
                 score = magic_model.compute_score(records)
                 wandb.log({'dev_score': score})
-                if (config.optimize_direction == 'max' and score >= magic_model._best_eval_score
-                ) or (config.optimize_direction == 'min' and score <= magic_model._best_eval_score):
+                if (self.config.optimize_direction == 'max' and score >= magic_model._best_eval_score
+                ) or (self.config.optimize_direction == 'min' and score <= magic_model._best_eval_score):
                     logger.info('==>>>best score:{}/eval score:{}'.format(magic_model._best_eval_score,score))
                     logger.info('==>>>best model is saved at {}'.format(model_path))
                     magic_model._best_eval_score = score
                     magic_model.save_model(model_path=model_path)
+
+        destroy_process_group()
+
+
+    def test(self):
+        # rank and world_size will be automatically set by torchrun
+        init_process_group(backend='nccl')
+        torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+
+        device_id = int(os.environ['LOCAL_RANK'])
+        global_rank = int(os.environ['RANK'])
+        print('local rank:{} | global rank:{}'.format(device_id, global_rank))
+
+        if global_rank == 0:
+            wandb_run = wandb.init(
+                project=self.config.project_name,
+                name=self.config.run_name,
+                config=self.config
+            )
+
+        self.model = self.get_model()
+        self.tokenizer = self.get_tokenizer()
+
+        self.model.to("cuda:{}".format(device_id))
+        self.model = DDP(self.model, device_ids=[device_id], find_unused_parameters=True)
+
+        magic_model = MagicModel(
+            self.model,
+            self.tokenizer,
+            inference=self.inference,
+            compute_score=self.compute_score,
+            process_outs=lambda tokenizer, outs, batch: outs,
+            distributed=True,
+            local_rank=device_id,
+            global_rank=global_rank)
+
+        val_loader = get_dataloader(
+            dataset_file=self.config.test_file,
+            format='json',
+            tokenizer=self.tokenizer,
+            construct_instance=self.construct_instance,
+            process_inputs=self.process_inputs,
+            sample_weight=None,
+            is_train=False,
+            use_cache=False,
+            cache_dir=self.config.cache_dir,
+            batch_size=self.config.batch_size,
+            collate_fn=self.collate_fn,
+            is_chinese=self.config.is_chinese,
+            num_workers=self.config.num_workers,
+            distributed=True
+        )
+
+        magic_model.load_data('test', val_loader)
+
+        model_path = os.path.join(self.config.log_dir, 'best_model.pth')
+        magic_model.resume(model_path)
+        records = magic_model.test()
+
+        if global_rank == 0:
+            logger.info(f'==>>>record:{len(records)},data:{len(magic_model._dataset["test"].dataset.data)}')
+            score = magic_model.compute_score(records)
+            wandb.log({'dev_score': score})
+            eval_out_dir = os.path.join(self.config.log_dir, self.config.eval_out)
+            os.makedirs(eval_out_dir, exist_ok=True)
+            with open(os.path.join(eval_out_dir,'predictions.json'), 'w') as f:
+                json.dump(records,f,indent=2)
+
+            with open(os.path.join(eval_out_dir,'scores.json'),'w') as f:
+                json.dump({'acc':'{%.4f}'.format(score)},f,indent=2)
 
         destroy_process_group()
