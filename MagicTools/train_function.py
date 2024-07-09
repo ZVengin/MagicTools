@@ -104,7 +104,7 @@ class TrainUtils:
             loss_function=self.loss_function,
             inference=self.inference,
             compute_score=self.compute_score,
-            process_outs=lambda tokenizer, outs, batch: outs,
+            process_outs=self.processs_outs,
             init_eval_score=self.config.init_eval_score,
             optimize_direction=self.config.optimize_direction,
             distributed=True,
@@ -202,7 +202,7 @@ class TrainUtils:
             self.tokenizer,
             inference=self.inference,
             compute_score=self.compute_score,
-            process_outs=lambda tokenizer, outs, batch: outs,
+            process_outs=self.processs_outs,
             distributed=True,
             local_rank=device_id,
             global_rank=global_rank)
