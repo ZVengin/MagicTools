@@ -30,7 +30,7 @@ def gather_all_objects(obj):
 class MagicModel(nn.Module):
     def __init__(self, model, tokenizer, 
                  cache_dir=None, loss_function=None, inference=None, 
-                 compute_score=None, process_outs=lambda tokenizer,outs,batch:outs,
+                 compute_score=None, process_outs=lambda tokenizer,outs:outs,
                  init_eval_score= 10000, optimize_direction='min', distributed=False,
                  local_rank=0, global_rank=0):
         nn.Module.__init__(self)
