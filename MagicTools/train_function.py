@@ -240,6 +240,6 @@ class TrainUtils:
                 json.dump(records,f,indent=2)
 
             with open(os.path.join(eval_out_dir,'scores.json'),'w') as f:
-                json.dump({'acc':'{%.4f}'.format(score)},f,indent=2)
+                json.dump({'acc':'{:.4f}'.format(score)},f,indent=2)
 
         destroy_process_group()
