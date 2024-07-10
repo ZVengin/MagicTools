@@ -233,7 +233,7 @@ class TrainUtils:
         if global_rank == 0:
             logger.info(f'==>>>record:{len(records)},data:{len(magic_model._dataset["test"].dataset.data)}')
             score = magic_model.compute_score(records)
-            wandb.log({'dev_score': score})
+            wandb.log({'test_score': score})
             eval_out_dir = os.path.join(self.config.log_dir, self.config.eval_out)
             os.makedirs(eval_out_dir, exist_ok=True)
             with open(os.path.join(eval_out_dir,'predictions.json'), 'w') as f:
