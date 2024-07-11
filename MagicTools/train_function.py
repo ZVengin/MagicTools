@@ -20,7 +20,6 @@ class TrainUtils:
             self.config = self.get_train_arguments()
         else:
             self.config = self.get_test_arguments()
-        self.set_random_seed(self.config.seed)
         self.model = None
         self.tokenizer = None
 
@@ -78,6 +77,7 @@ class TrainUtils:
         # rank and world_size will be automatically set by torchrun
         init_process_group(backend='nccl')
         torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+        self.set_random_seed(self.config.seed)
 
         device_id = int(os.environ['LOCAL_RANK'])
         global_rank = int(os.environ['RANK'])
@@ -179,6 +179,7 @@ class TrainUtils:
         # rank and world_size will be automatically set by torchrun
         init_process_group(backend='nccl')
         torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+        self.set_random_seed(self.config.seed)
 
         device_id = int(os.environ['LOCAL_RANK'])
         global_rank = int(os.environ['RANK'])
