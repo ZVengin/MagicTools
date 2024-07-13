@@ -1,8 +1,11 @@
-import json,os
+import json,os,logging
 import pandas as pd
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(message)s')
+logger = logging.getLogger(__name__)
+
 class MagicDataset(Dataset):
   def __init__(self,
                dataset_path,
@@ -66,9 +69,11 @@ class MagicDataset(Dataset):
 
     dataset_name = os.path.basename(dataset_path).split('.')[0]
     if self.use_cache and self.cache_dir != None and os.path.exists(os.path.join(self.cache_dir,dataset_name)):
+        logger.info('Using cached dataset {}'.format(os.path.join(self.cache_dir,dataset_name)))
         with open(os.path.join(self.cache_dir,dataset_name),'r') as f:
             self.data = json.load(f)
     else:
+        logger.info('Constructing dataset {}'.format(dataset_name))
         self.data = self.construct_instance(self.data,self.tokenizer,self.is_train, self.is_chinese)
         if self.cache_dir != None:
             os.makedirs(self.cache_dir,exist_ok=True)
