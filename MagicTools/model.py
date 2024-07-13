@@ -112,7 +112,7 @@ class MagicModel(nn.Module):
 
             batch_loss = batch_loss/accumulated_size
             batch_loss.backward()
-            logger.info('start transition weight:{}'.format(self._model.module.crf.start_transitions.weight.grad))
+            logger.info('start transition weight:{}'.format(self._model.module.crf.transitions.weight.grad))
             avg_loss += batch_loss.item()
             if self._global_step%accumulated_size == 0:
                 self._optimizer.step()
