@@ -88,10 +88,15 @@ class MyTrainUtils(TrainUtils):
 - training script
 ```python
 if __name__ == '__main__':
-    train_utils = MyTrainUtils()
-    config = train_utils.get_arguments()
-    tokenizer = train_utils.get_tokenizer()
-    train_utils.train(config)
+    train_utils = MyTrainUtils(mode='train')
+    train_utils.train()
+```
+
+- test script
+```python
+if __name__ == '__main__':
+    train_utils = MytrainUtils(mode='test')
+    train_utils.test()
 ```
 
 - running the training script using the torchrun on
