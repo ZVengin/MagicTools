@@ -31,10 +31,18 @@ class MyTrainUtils(TrainUtils):
         # how to load tokenizer
         return tokenizer
 
-    def get_arguments(self):
+    def get_train_arguments(self):
         # define the commandline arguments
         parser = argparse.ArgumentParser()
         parser.add_argument('--train_file',...)
+        ...
+        args = parser.parse_args()
+        return args
+    
+    def get_test_arguments(self):
+        # define the commandline arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--test_file',...)
         ...
         args = parser.parse_args()
         return args
