@@ -68,6 +68,7 @@ class MagicDataset(Dataset):
                      for line in data[1:]]
 
     dataset_name = os.path.basename(dataset_path)
+    logger.info('use cached dataset :{}'.format(self.use_cache))
     logger.info('cache file path: {}'.format(os.path.join(self.cache_dir,dataset_name)))
     logger.info('cache file exist:{}'.format(os.path.exists(os.path.join(self.cache_dir,dataset_name))))
     if self.use_cache and self.cache_dir != None and os.path.exists(os.path.join(self.cache_dir,dataset_name)):
