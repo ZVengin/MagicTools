@@ -218,7 +218,7 @@ class TrainUtils:
             process_inputs=self.process_inputs,
             sample_weight=None,
             is_train=False,
-            use_cache=False,
+            use_cache=self.config.use_cache,
             cache_dir=self.config.cache_dir,
             batch_size=self.config.batch_size,
             collate_fn=self.collate_fn,
