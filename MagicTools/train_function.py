@@ -5,6 +5,7 @@ import wandb
 import logging
 import os
 import random
+import gc
 import numpy as np
 from .model import MagicModel
 from .dataset import get_dataloader
@@ -174,6 +175,9 @@ class TrainUtils:
                     magic_model._best_eval_score = score
                     magic_model.save_model(model_path=model_path)
 
+        del magic_model
+        gc.collect()
+        torch.cuda.empty_cache()
         destroy_process_group()
 
 
@@ -245,4 +249,7 @@ class TrainUtils:
             with open(os.path.join(eval_out_dir,'scores.json'),'w') as f:
                 json.dump({'acc':'{:.4f}'.format(score)},f,indent=2)
 
+        del magic_model
+        gc.collect()
+        torch.cuda.empty_cache()
         destroy_process_group()
