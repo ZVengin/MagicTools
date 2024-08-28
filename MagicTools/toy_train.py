@@ -97,6 +97,7 @@ class MyTrainUtils(TrainUtils):
         parser.add_argument('--epochs', type=int, default=50)
         parser.add_argument('--warmup_rate', type=float, default=0.1)
         parser.add_argument('--resume', action='store_true')
+        parser.add_argument('--only_load_model',action='store_true')
         parser.add_argument('--log_dir', type=str, required=True)
         parser.add_argument('--project_name', type=str, default='MagicToolsTest')
         parser.add_argument('--run_name', type=str, default='SST2')

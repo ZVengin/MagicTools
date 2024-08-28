@@ -84,12 +84,12 @@ class MagicModel(nn.Module):
             ckpt["model"] = self.model.state_dict()
         torch.save(ckpt, model_path)
 
-    def resume(self, model_path):
+    def resume(self, model_path, only_load_model):
         assert os.path.exists(model_path), 'model file does not exist'
         ckpt = torch.load(model_path)
-        if self._optimizer is not None:
+        if self._optimizer is not None and not only_load_model:
             self._optimizer.load_state_dict(ckpt["optimizer"])
-        if self._lr_scheduler is not None:
+        if self._lr_scheduler is not None and not only_load_model:
             self._lr_scheduler.load_state_dict(ckpt["lr_scheduler"])
         if self._distributed:
             self._model.module.load_state_dict(ckpt["model"])
