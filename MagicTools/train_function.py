@@ -159,7 +159,8 @@ class TrainUtils:
 
         model_path = os.path.join(self.config.log_dir, 'best_model.pth')
         if self.config.resume:
-            magic_model.resume(model_path, self.config.only_load_model)
+            resume_model_path = os.path.join(self.config.resume_dir, 'best_model.pth')
+            magic_model.resume(resume_model_path, self.config.only_load_model)
 
         for epoch in range(magic_model._epoch, self.config.epochs):
             magic_model.train_epoch(epoch, accumulated_size=self.config.accumulated_size)
