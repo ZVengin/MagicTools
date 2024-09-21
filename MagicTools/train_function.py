@@ -128,7 +128,8 @@ class TrainUtils:
             collate_fn=self.collate_fn,
             is_chinese=self.config.is_chinese,
             num_workers=self.config.num_workers,
-            distributed=True
+            distributed=True,
+            epoch_based=self.config.epoch_based
         )
 
         val_loader = get_dataloader(
@@ -145,7 +146,8 @@ class TrainUtils:
             collate_fn=self.collate_fn,
             is_chinese=self.config.is_chinese,
             num_workers=self.config.num_workers,
-            distributed=True
+            distributed=True,
+            epoch_based=False
         )
         magic_model.load_data('train', train_loader)
         magic_model.load_data('test', val_loader)
@@ -163,6 +165,8 @@ class TrainUtils:
             magic_model.resume(resume_model_path, self.config.only_load_model)
 
         for epoch in range(magic_model._epoch, self.config.epochs):
+            if self.config.epoch_based:
+                magic_model._dataset['train'].dataset.set_epoch(epoch)
             magic_model.train_epoch(epoch, accumulated_size=self.config.accumulated_size)
             records = magic_model.test()
             if global_rank == 0:
@@ -229,7 +233,8 @@ class TrainUtils:
             collate_fn=self.collate_fn,
             is_chinese=self.config.is_chinese,
             num_workers=self.config.num_workers,
-            distributed=True
+            distributed=True,
+            epoch_based=self.config.epoch_based
         )
 
         magic_model.load_data('test', val_loader)
